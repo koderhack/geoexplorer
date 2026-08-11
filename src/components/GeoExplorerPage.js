@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import ShaderBackground from "./ShaderBackground";
 import LocaleSwitcher from "./LocaleSwitcher";
+import Countdown from "./Countdown";
 import {
   SUPPORTED_LOCALES,
   geoToLocale,
@@ -100,6 +101,7 @@ export default function GeoExplorerPage({ initialLocale, initialSource }) {
     const targetIds = [
       "logo",
       "coming-soon",
+      "countdown",
       "crate-display",
       "newsletter-module",
     ];
@@ -236,6 +238,20 @@ export default function GeoExplorerPage({ initialLocale, initialSource }) {
             </p>
             <div className="h-px w-8 bg-signal-green opacity-50" />
           </div>
+        </div>
+
+        <div
+          id="countdown"
+          className="w-full flex items-center justify-center my-7 md:my-8 relative boot-hidden"
+        >
+          <Countdown
+            labels={{
+              days: t("countdownDays"),
+              hours: t("countdownHours"),
+              minutes: t("countdownMinutes"),
+              seconds: t("countdownSeconds"),
+            }}
+          />
         </div>
 
         {/* Center: Expedition Crate */}

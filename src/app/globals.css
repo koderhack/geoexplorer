@@ -242,6 +242,23 @@ body {
   50%, 100% { opacity: 0; }
 }
 
+/* ===== Countdown ===== */
+.font-display {
+  font-family: var(--font-display-lg);
+  font-weight: 700;
+}
+
+.countdown-digit {
+  color: #a4c639;
+  text-shadow: 0 0 6px #a4c6398c, 0 0 22px #a4c63947;
+}
+
+.countdown-sep {
+  color: #a4c639;
+  text-shadow: 0 0 10px #a4c63980;
+  animation: blinkCursor 1s steps(2, jump-none) infinite;
+}
+
 /* ===== Random signal drop-out ===== */
 .signal-drop {
   filter: brightness(0.45) contrast(1.35) saturate(1.2);
