@@ -12,5 +12,5 @@
 :HL["/geoexplorer/_next/static/media/a7afbb44bec2bb18-s.p.1qc6dx89jd2qv.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/geoexplorer/_next/static/media/effe91970fc4db64-s.p.0oace-s_gkfks.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/geoexplorer/_next/static/chunks/0n8kzvw2z_6as.css","style"]
-:HL["https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"PhJPeCU0ne00ps4tbbd9G"}
+:HL["https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"5xBriEywtbmxoxjX4RmIi"}
