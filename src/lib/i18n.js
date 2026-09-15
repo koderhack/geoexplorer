@@ -1,3 +1,21 @@
+export const COUNTDOWN_LABELS = {
+  en: ["DAYS", "HOURS", "MIN", "SEC"],
+  pl: ["DNI", "GODZ", "MIN", "SEK"],
+  de: ["TAGE", "STD", "MIN", "SEK"],
+  fr: ["JOURS", "HEUR", "MIN", "SEC"],
+  es: ["DÍAS", "HORAS", "MIN", "SEG"],
+  it: ["GIORNI", "ORE", "MIN", "SEC"],
+  pt: ["DIAS", "HORAS", "MIN", "SEG"],
+  nl: ["DAGEN", "UREN", "MIN", "SEC"],
+  uk: ["ДНІ", "ГОД", "ХВ", "СЕК"],
+  cs: ["DNÍ", "HOD", "MIN", "SEK"],
+  sv: ["DAGAR", "TIMMAR", "MIN", "SEK"],
+};
+
+export function countdownLabels(locale) {
+  return COUNTDOWN_LABELS[locale] || COUNTDOWN_LABELS.en;
+}
+
 export const SUPPORTED_LOCALES = [
   "en",
   "pl",

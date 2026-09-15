@@ -1,331 +1,196 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import ShaderBackground from "./ShaderBackground";
-import LocaleSwitcher from "./LocaleSwitcher";
-import {
-  SUPPORTED_LOCALES,
-  geoToLocale,
-  setLocaleCookie,
-  translate,
-} from "@/lib/i18n";
-
-const CRATE_IMAGE_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC2kF_TVOtWZRH6lIS8YKEidSCcALRkG_ubsQiEKUPsxPTF6mNOBHgBSSCzmYa702NP9fUw5WF3IXm_n14Xjij7QWPwsu5cxeoBRrhIm4DIIf6domifO6zUPSE1mGz3EmB8WIUzGL0U4fj20nCPWNNw3wEuE1qjH36kWqj2_jvNGco4K5_iB11vJpg4ydGNlu_PiGJzSq-MQG6nR40cgfmSNULsebPt7gHVTXihd7lMqzJzr6tokOH4fgJjIMAickerpA";
-
-// Newsletter: Web3Forms (darmowe, bez serwera) > Google Sheets > lokalne API
-const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "";
-const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
-
-function getNewsletterEndpoint() {
-  if (WEB3FORMS_ACCESS_KEY) return WEB3FORMS_ENDPOINT;
-  return process.env.NEXT_PUBLIC_NEWSLETTER_ENDPOINT || "/api/subscribe";
-}
+import { useCallback, useRef } from "react";
+import MapPreview from "./MapPreview";
 
 export default function GeoExplorerPage({ initialLocale, initialSource }) {
-  const [locale, setLocale] = useState(initialLocale);
-  const localeRef = useRef(initialLocale);
-  const sourceRef = useRef(initialSource);
-  const [formState, setFormState] = useState("idle"); // idle | sending | success | error
-  const [email, setEmail] = useState("");
-  const logoRef = useRef(null);
-  const rootRef = useRef(null);
+  const betaRef = useRef(null);
+  const mapRef = useRef(null);
 
-  const t = useCallback((key) => translate(locale, key), [locale]);
-
-  const applyLocale = useCallback((nextLocale, source) => {
-    setLocale(nextLocale);
-    localeRef.current = nextLocale;
-    sourceRef.current = source;
-    setLocaleCookie(nextLocale, source);
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = nextLocale;
-    }
+  const scrollToBeta = useCallback(() => {
+    betaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // Keep <html lang> in sync on first render
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
-  // --- Geo-localization detection (only for auto-detected visitors) ---
-  useEffect(() => {
-    if (sourceRef.current !== "auto") return;
-
-    let cancelled = false;
-
-    const fallbackToNavigator = () => {
-      if (cancelled) return;
-      const navLang =
-        (typeof navigator !== "undefined" && navigator.language) || "en";
-      const base = navLang.slice(0, 2).toLowerCase();
-      if (SUPPORTED_LOCALES.includes(base) && base !== localeRef.current) {
-        applyLocale(base, "auto");
-      }
-    };
-
-    const detectByIp = async () => {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 2500);
-        const response = await fetch("https://ipapi.co/json/", {
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-        if (!response.ok) {
-          fallbackToNavigator();
-          return;
-        }
-        const data = await response.json();
-        if (cancelled) return;
-        const detected = geoToLocale(data?.country_code);
-        if (detected && detected !== localeRef.current) {
-          applyLocale(detected, "auto");
-        } else {
-          fallbackToNavigator();
-        }
-      } catch {
-        fallbackToNavigator();
-      }
-    };
-
-    detectByIp();
-    return () => {
-      cancelled = true;
-    };
-  }, [applyLocale]);
-
-  // --- System boot sequence (staggered entrance) ---
-  useEffect(() => {
-    const targetIds = [
-      "logo",
-      "coming-soon",
-      "crate-display",
-      "newsletter-module",
-    ];
-    targetIds
-      .map((id) => document.getElementById(id))
-      .filter(Boolean)
-      .forEach((element, index) => {
-        setTimeout(() => {
-          element.classList.remove("boot-hidden");
-          element.classList.add("boot-anim");
-        }, index * 400);
-      });
+  const scrollToMap = useCallback(() => {
+    mapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
-
-  // --- Random glitch effect (strong, on logo + tagline, double bursts) ---
-  useEffect(() => {
-    let timeoutId;
-
-    const triggerGlitch = () => {
-      const targets = ["logo", "coming-soon"]
-        .map((id) => document.getElementById(id))
-        .filter(Boolean);
-      if (targets.length) {
-        const element = targets[Math.floor(Math.random() * targets.length)];
-        const burstCount = Math.random() > 0.55 ? 2 : 1;
-        for (let i = 0; i < burstCount; i += 1) {
-          setTimeout(() => {
-            element.classList.add("glitch-active");
-            setTimeout(() => {
-              element.classList.remove("glitch-active");
-            }, 220 + Math.random() * 280);
-          }, i * 260);
-        }
-      }
-      timeoutId = setTimeout(triggerGlitch, 1200 + Math.random() * 3200);
-    };
-
-    timeoutId = setTimeout(triggerGlitch, 1500);
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  // --- Random signal drop-out (whole UI flicker) ---
-  useEffect(() => {
-    const root = rootRef.current;
-    let timeoutId;
-
-    const signalDrop = () => {
-      if (root) {
-        root.classList.add("signal-drop");
-        setTimeout(() => {
-          root.classList.remove("signal-drop");
-        }, 240);
-      }
-      timeoutId = setTimeout(signalDrop, 8000 + Math.random() * 12000);
-    };
-
-    timeoutId = setTimeout(signalDrop, 4500 + Math.random() * 5000);
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
-    if (formState === "sending") return;
-
-    setFormState("sending");
-
-    // Timeout: zapobiega "zawieszonemu" przyciskowi, gdy sieć nie odpowiada
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-      const payload = WEB3FORMS_ACCESS_KEY
-        ? { access_key: WEB3FORMS_ACCESS_KEY, email, locale, source: "page" }
-        : { email, locale, source: "page" };
-
-      const response = await fetch(getNewsletterEndpoint(), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-
-      const data = await response.json().catch(() => null);
-      let success = response.ok;
-      if (data && typeof data.success === "boolean") {
-        success = data.success;
-      }
-      setFormState(success ? "success" : "error");
-    } catch {
-      setFormState("error");
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   return (
-    <div
-      ref={rootRef}
-      className="bg-surface text-on-surface min-h-screen w-full relative flex flex-col crt-flicker selection:bg-signal-green selection:text-surface-deep"
-    >
-      {/* Animated Shader Background */}
-      <ShaderBackground />
-      <div className="absolute inset-0 z-0 bg-surface/80" />
-
-      {/* Scanlines Overlay */}
-      <div className="absolute inset-0 z-50 scanlines opacity-40" />
-
-      {/* Minimal language switcher */}
-      <div className="absolute bottom-margin right-margin z-40 opacity-60 hover:opacity-100 transition-opacity">
-        <LocaleSwitcher locale={locale} onLocaleChange={applyLocale} />
-      </div>
-
-      {/* Main Content Canvas */}
-      <main className="relative z-10 flex-grow flex flex-col items-center justify-center p-margin max-w-7xl mx-auto w-full">
-        <div className="flex flex-col items-center justify-center text-center mb-8">
-          <h1
-            ref={logoRef}
-            id="logo"
-            data-text="GeoExplorer"
-            className="font-headline-lg text-[40px] md:text-[56px] uppercase tracking-widest leading-none mb-2 text-on-background relative inline-block boot-hidden"
-          >
-            GeoExplorer
-          </h1>
+    <div className="min-h-screen bg-[#F2F2F4] text-[#121214] selection:bg-[#6F9A12]/20">
+      {/* Header — matches DesignBrandHeader */}
+      <header className="sticky top-0 z-30 bg-[#F2F2F4]/85 backdrop-blur-xl border-b border-[#C8C8CE]/50 supports-[backdrop-filter]:bg-[#F2F2F4]/70">
+        <div className="mx-auto max-w-[1120px] px-4 sm:px-6 h-[64px] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-px w-8 bg-signal-green opacity-50" />
-            <p
-              id="coming-soon"
-              data-text={t("comingSoon")}
-              className="font-data-lg text-data-lg uppercase tracking-[0.2em] text-signal-green drop-shadow-[0_0_8px_rgba(164,198,57,0.4)] crt-flicker-low boot-hidden relative"
+            <img
+              src="/brand-logo.png"
+              alt="GeoExplorer"
+              width={36}
+              height={36}
+              className="w-9 h-9 rounded-[9px] object-cover border border-[#6F9A12]/30 shadow-sm"
+              style={{ borderRadius: 9 }}
+            />
+            <span className="text-[15px] font-bold tracking-tight text-[#121214]">GeoExplorer</span>
+            <span className="hidden sm:inline-flex items-center ml-2 px-2.5 py-1 rounded-full bg-[#EEF4DD] border border-[#DDE8B8] text-[11px] font-bold tracking-wide text-[#4A6B0A] uppercase">
+              Beta • TestFlight
+            </span>
+          </div>
+
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#6B6B73]">
+            <button onClick={scrollToMap} className="hover:text-[#121214] transition">
+              Mapa
+            </button>
+            <button onClick={scrollToBeta} className="hover:text-[#121214] transition">
+              Betatesty
+            </button>
+            <a
+              href="mailto:hello@geoexplorer.app"
+              className="hover:text-[#121214] transition inline-flex items-center gap-1"
             >
-              {t("comingSoon")}
-              <span className="blink-cursor ml-1">▊</span>
-            </p>
-            <div className="h-px w-8 bg-signal-green opacity-50" />
+              Kontakt
+              <span className="material-symbols-outlined text-[14px]">arrow_outward</span>
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <a
+              href="https://testflight.apple.com/join/U5CPEY7B"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center justify-center h-9 px-5 rounded-full bg-[#121214] hover:bg-black text-white text-[13px] font-semibold transition"
+            >
+              Dołącz do bety
+            </a>
+            <a
+              href="https://testflight.apple.com/join/U5CPEY7B"
+              target="_blank"
+              rel="noreferrer"
+              className="sm:hidden w-9 h-9 rounded-full bg-[#121214] text-white flex items-center justify-center"
+              aria-label="Dołącz do betatestów"
+            >
+              <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </a>
           </div>
         </div>
+      </header>
 
-        {/* Center: Expedition Crate */}
-        <div
-          id="crate-display"
-          className="flex items-center justify-center w-full max-w-[280px] sm:max-w-sm md:max-w-md p-6 relative boot-hidden"
-        >
-          <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-            <div
-              className="w-[150%] h-[150%] rounded-full blur-[60px] animate-pulse opacity-60"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(188, 203, 185, 0.8) 0%, rgba(164, 198, 57, 0.3) 40%, transparent 70%)",
-              }}
+      {/* Hero */}
+      <section className="mx-auto max-w-[1120px] px-4 sm:px-6 pt-10 sm:pt-14 md:pt-16 pb-8 sm:pb-10">
+        <div className="max-w-[760px] mx-auto text-center">
+          {/* App icon hero — tactical crate */}
+          <div className="mx-auto mb-6 w-[84px] h-[84px] sm:w-[96px] sm:h-[96px] rounded-[22px] overflow-hidden shadow-[0_10px_30px_rgba(18,18,20,0.12),0_2px_8px_rgba(18,18,20,0.08)] border border-[#C8C8CE]/40 bg-white">
+            <img
+              src="/app-icon.png"
+              alt="GeoExplorer — ikona aplikacji"
+              width={96}
+              height={96}
+              className="w-full h-full object-cover"
             />
           </div>
-          <img
-            alt={t("crateAlt")}
-            src={CRATE_IMAGE_URL}
-            className="w-full h-auto filter drop-shadow-[0_0_30px_rgba(164,198,57,0.5)] sepia-[0.3] hue-rotate-[-30deg] saturate-50 opacity-90 transition-all duration-1000 crt-flicker-low relative z-10"
-          />
-        </div>
 
-        {/* Newsletter Module */}
-        <div
-          id="newsletter-module"
-          className="w-full max-w-md mt-8 bg-surface-container-low/80 backdrop-blur-sm border border-outline-variant p-6 relative boot-hidden"
-        >
-          <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-signal-green" />
-          {formState === "success" ? (
-            <div className="flex flex-col items-center gap-3 py-6 text-center">
-              <span className="material-symbols-outlined text-[32px] text-signal-green">
-                check_circle
-              </span>
-              <p className="font-data-lg text-data-lg text-signal-green tracking-widest">
-                {t("successTitle")}
-              </p>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">
-                {t("successSub")}
-              </p>
-            </div>
-          ) : (
-            <>
-              <label className="block font-label-sm text-label-sm text-signal-green mb-4 flex items-center gap-2 uppercase tracking-widest">
-                <span className="material-symbols-outlined text-[14px]">
-                  terminal
-                </span>
-                {t("newsletterTitle")}
-              </label>
-              <form className="flex flex-col gap-4 group" onSubmit={handleSubmit}>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-signal-green font-label-sm opacity-50">
-                    &gt;
-                  </span>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder={t("emailPlaceholder")}
-                    className="w-full bg-surface-deep border border-outline-variant text-on-surface font-body-md text-body-md pl-8 pr-4 py-3 focus:outline-none focus:border-signal-green focus:ring-1 focus:ring-signal-green transition-colors placeholder:text-outline-variant rounded-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={formState === "sending"}
-                  className="w-full bg-signal-green text-surface-deep font-data-lg text-data-lg py-3 hover:bg-primary transition-colors border border-signal-green uppercase flex justify-center items-center gap-2 group-hover:drop-shadow-[0_0_8px_rgba(164,198,57,0.5)] disabled:opacity-60 disabled:cursor-wait"
-                >
-                  {formState === "sending" ? t("subscribeSending") : t("submit")}
-                  <span className="material-symbols-outlined text-[20px]">
-                    arrow_forward
-                  </span>
-                </button>
-              </form>
-              <div className="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant opacity-60 mt-4">
-                <span className="w-2 h-2 bg-signal-green rounded-full animate-pulse" />
-                <span className="tracking-widest">{t("connection")}</span>
-              </div>
-              {formState === "error" && (
-                <div className="flex items-center gap-2 font-label-sm text-label-sm text-error mt-3">
-                  <span className="material-symbols-outlined text-[14px]">
-                    error
-                  </span>
-                  <span>{t("subscribeError")}</span>
-                </div>
-              )}
-            </>
-          )}
+          {/* badge — tactical */}
+          <div className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white border border-[#C8C8CE]/70 shadow-sm text-xs font-medium text-[#121214]">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#6F9A12] text-black/85 text-[11px] font-bold tracking-wide uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-black/70 animate-pulse" />
+              Nowość
+            </span>
+            <span className="hidden sm:inline">Jedna mapa — wszystkie sposoby odkrywania</span>
+            <span className="sm:hidden">Wszystko na jednej mapie</span>
+          </div>
+
+          <h1 className="mt-6 text-[32px] sm:text-[42px] md:text-[52px] font-[700] tracking-[-0.03em] leading-[0.96] text-[#121214]">
+            Jedna mapa zamiast pięciu aplikacji do odkrywania okolicy
+          </h1>
+
+          <p className="mt-5 text-[16px] sm:text-[18px] leading-relaxed text-[#6B6B73] max-w-[640px] mx-auto text-balance">
+            GeoExplorer łączy kesze, questy, lokalne kolekcje rzeźb, krakowskie parki i inne rzeczy w mieście do odkrycia — na jednej mapie.
+          </p>
+
+          <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href="https://testflight.apple.com/join/U5CPEY7B"
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-12 px-7 rounded-[16px] bg-[#6F9A12] hover:bg-[#5F850F] text-[#0F1206] text-[15px] font-bold shadow-[0_8px_20px_rgba(111,154,18,0.28)] transition"
+            >
+              Dołącz do betatestów
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+            <button
+              onClick={scrollToMap}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-12 px-7 rounded-[16px] bg-white border border-[#C8C8CE] hover:border-[#B8BCC4] hover:bg-[#F7F7F8] text-[#121214] text-[15px] font-semibold transition"
+            >
+              <span className="material-symbols-outlined text-[18px]">map</span>
+              Zobacz podgląd mapy
+            </button>
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#9AA0A6]">
+            <span>Bezpłatnie</span>
+            <span className="w-1 h-1 rounded-full bg-[#C8C8CE]" />
+            <span>TestFlight</span>
+            <span className="w-1 h-1 rounded-full bg-[#C8C8CE]" />
+            <span>2 minuty</span>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Map - central */}
+      <section ref={mapRef} className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-8 sm:pb-12 scroll-mt-20">
+        <MapPreview />
+      </section>
+
+      {/* Beta — minimalist */}
+      <section ref={betaRef} className="mx-auto max-w-[640px] px-4 sm:px-6 pb-16 sm:pb-20 scroll-mt-20">
+        <div className="text-center py-10 sm:py-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#C8C8CE]/50 text-xs font-medium text-[#6B6B73]">
+            <span className="w-2 h-2 rounded-full bg-[#6F9A12]" />
+            Beta • TestFlight
+          </div>
+          <h2 className="mt-5 text-[24px] sm:text-[28px] font-bold tracking-tight text-[#121214]">
+            Dołącz do betatestów
+          </h2>
+          <p className="mt-3 text-[15px] leading-relaxed text-[#6B6B73] text-balance">
+            Jedno kliknięcie. TestFlight zainstaluje GeoExplorer na Twoim iPhonie.
+          </p>
+          <a
+            href="https://testflight.apple.com/join/U5CPEY7B"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-7 inline-flex items-center justify-center gap-2 h-12 px-8 rounded-full bg-[#6F9A12] hover:bg-[#5F850F] text-[#0F1206] text-[15px] font-bold transition"
+          >
+            <span className="material-symbols-outlined text-[20px]">flight_takeoff</span>
+            Dołącz przez TestFlight
+          </a>
+          <p className="mt-3 text-xs text-[#9AA0A6]">iOS 16+ • 30+ odkrywców już testuje</p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-[#C8C8CE]/40 bg-[#F7F7F8]/60">
+        <div className="mx-auto max-w-[1120px] px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img
+              src="/brand-logo.png"
+              alt="GeoExplorer"
+              width={28}
+              height={28}
+              className="w-7 h-7 rounded-[7px] object-cover border border-[#6F9A12]/20"
+            />
+            <div className="text-sm">
+              <div className="font-bold text-[#121214] leading-none">GeoExplorer</div>
+              <div className="text-xs text-[#9AA0A6]">© {new Date().getFullYear()} GeoExplorer • Jedna mapa. Wiele przygód.</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs font-medium text-[#6B6B73]">
+            <a href="mailto:hello@geoexplorer.app" className="hover:text-[#121214] transition">
+              hello@geoexplorer.app
+            </a>
+            <span className="w-1 h-1 rounded-full bg-[#C8C8CE]" />
+            <span>Warszawa • Polska</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

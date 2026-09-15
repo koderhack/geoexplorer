@@ -4,6 +4,7 @@ export async function POST(request) {
   try {
     const body = await request.json().catch(() => ({}));
     const email = String(body.email || "").trim().toLowerCase();
+    const name = String(body.name || "").trim().slice(0, 80);
 
     if (!EMAIL_RE.test(email)) {
       return Response.json({ ok: false, error: "invalid_email" }, { status: 400 });
@@ -11,6 +12,7 @@ export async function POST(request) {
 
     await addSubscriber({
       email,
+      name,
       locale: body.locale,
       source: body.source,
     });

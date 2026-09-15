@@ -14,7 +14,7 @@ const plexMono = IBM_Plex_Mono({
 
 const plexSans = IBM_Plex_Sans({
   subsets: ["latin", "latin-ext", "cyrillic"],
-  weight: ["600", "700"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-plex-sans",
 });
@@ -22,15 +22,21 @@ const plexSans = IBM_Plex_Sans({
 async function getLocale() {
   if (IS_GH_PAGES) return "en";
   const cookieStore = await cookies();
-  return cookieStore.get("locale")?.value || "en";
+  return cookieStore.get("locale")?.value || "pl";
 }
 
 export async function generateMetadata() {
   const locale = await getLocale();
 
   return {
-    title: translate(locale, "metaTitle"),
-    description: translate(locale, "metaDescription"),
+    title: "GeoExplorer — Jedna mapa zamiast pięciu aplikacji",
+    description:
+      "GeoExplorer łączy kesze, questy, lokalne kolekcje rzeźb, krakowskie parki i inne rzeczy w mieście do odkrycia — na jednej mapie. Dołącz do betatestów przez TestFlight.",
+    openGraph: {
+      title: "GeoExplorer — Jedna mapa zamiast pięciu aplikacji",
+      description:
+        "Kesze, questy, kolekcje rzeźb, krakowskie parki i inne odkrycia — wszystko na jednej mapie.",
+    },
   };
 }
 
@@ -38,7 +44,7 @@ export default async function RootLayout({ children }) {
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className={`dark ${plexMono.variable} ${plexSans.variable}`}>
+    <html lang={locale} className={`${plexMono.variable} ${plexSans.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -51,7 +57,7 @@ export default async function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body className="bg-[#fcfcf9] text-[#111827] antialiased">{children}</body>
     </html>
   );
 }
