@@ -70,6 +70,10 @@ const en = {
   uplink: "Uplink Established",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Expedition Crate",
+  countdownDays: "DAYS",
+  countdownHours: "HOURS",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEC",
 };
 
 const pl = {
@@ -94,6 +98,10 @@ const pl = {
   uplink: "Uplink ustanowiony",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Skrzynia ekspedycyjna",
+  countdownDays: "DNI",
+  countdownHours: "GODZ",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEK",
 };
 
 const de = {
@@ -118,6 +126,10 @@ const de = {
   uplink: "Uplink hergestellt",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Expeditionskiste",
+  countdownDays: "TAGE",
+  countdownHours: "STD",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEK",
 };
 
 const fr = {
@@ -142,6 +154,10 @@ const fr = {
   uplink: "Liaison établie",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Caisse d'expédition",
+  countdownDays: "JOURS",
+  countdownHours: "HEUR",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEC",
 };
 
 const es = {
@@ -166,6 +182,10 @@ const es = {
   uplink: "Enlace establecido",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Caja de expedición",
+  countdownDays: "DÍAS",
+  countdownHours: "HORAS",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEG",
 };
 
 const it = {
@@ -190,6 +210,10 @@ const it = {
   uplink: "Collegamento stabilito",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Cassa da spedizione",
+  countdownDays: "GIORNI",
+  countdownHours: "ORE",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEC",
 };
 
 const pt = {
@@ -214,6 +238,10 @@ const pt = {
   uplink: "Ligação estabelecida",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Caixa de expedição",
+  countdownDays: "DIAS",
+  countdownHours: "HORAS",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEG",
 };
 
 const nl = {
@@ -238,6 +266,10 @@ const nl = {
   uplink: "Uplink gelegd",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Expeditiekist",
+  countdownDays: "DAGEN",
+  countdownHours: "UREN",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEC",
 };
 
 const uk = {
@@ -262,6 +294,10 @@ const uk = {
   uplink: "З'єднання встановлено",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Експедиційний ящик",
+  countdownDays: "ДНІ",
+  countdownHours: "ГОД",
+  countdownMinutes: "ХВ",
+  countdownSeconds: "СЕК",
 };
 
 const cs = {
@@ -286,6 +322,10 @@ const cs = {
   uplink: "Spojení navázáno",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Expediční bedna",
+  countdownDays: "DNÍ",
+  countdownHours: "HOD",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEK",
 };
 
 const sv = {
@@ -310,6 +350,10 @@ const sv = {
   uplink: "Uplink upprättad",
   sysReady: "SYS.READY // 45.3948° N, 14.8193° E",
   crateAlt: "Expeditionslåda",
+  countdownDays: "DAGAR",
+  countdownHours: "TIMMAR",
+  countdownMinutes: "MIN",
+  countdownSeconds: "SEK",
 };
 
 const dictionaries = { en, pl, de, fr, es, it, pt, nl, uk, cs, sv };
